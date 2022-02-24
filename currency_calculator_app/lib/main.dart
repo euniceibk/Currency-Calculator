@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(),
+      home: const MyHomePage(),
     );
   }
 }
@@ -40,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController();
   TextEditingController _currencyTextEditingController =
       TextEditingController();
-  final String _baseCurrency='PLN';
+  final String _baseCurrency = 'EUR';
   final String _currency = 'PLN';
   bool isLoading = false;
   String time = DateFormat("HH:mm").format(DateTime.now().toUtc());
@@ -49,7 +49,12 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack, overlays: []);
+    _currencyBloc = CurrencyBloc();
+    _latestRatesBloc = LatestRatesBloc(_baseCurrency, _currency);
+
     _currencyBloc.fetchCurrencyList();
+    _latestRatesBloc.fetchLatestRateList(_baseCurrency, _currency);
+    
     _baseCurrencyTextEditingController =
         TextEditingController(text: widget.key.toString());
     _currencyTextEditingController =
@@ -190,8 +195,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         width: width / 3,
                         child: TextFormField(
                           cursorColor: AppColors.blue,
-                          controller: _currencyTextEditingController,
-                          keyboardType: TextInputType.number,
+                          controller: _baseCurrencyTextEditingController,
+                          keyboardType: TextInputType.text,
                           decoration: InputDecoration(
                             filled: false,
                             suffixText: _currency,
@@ -243,7 +248,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: TextFormField(
                           cursorColor: AppColors.blue,
                           controller: _currencyTextEditingController,
-                          keyboardType: TextInputType.number,
+                          keyboardType: TextInputType.text,
                           decoration: InputDecoration(
                             filled: false,
                             suffixText: _currency,
