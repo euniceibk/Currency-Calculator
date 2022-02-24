@@ -2,7 +2,6 @@ import 'package:currency_calculator_app/bloc/currencies_bloc.dart';
 import 'package:currency_calculator_app/bloc/latest_rates_bloc.dart';
 import 'package:currency_calculator_app/data/app_colors.dart';
 import 'package:currency_calculator_app/data/app_strings.dart';
-import 'package:currency_calculator_app/models/available_currencies.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +18,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // Remove the debug banner
+      debugShowCheckedModeBanner: false,
+
       title: 'Currency  Calculator',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -54,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     _currencyBloc.fetchCurrencyList();
     _latestRatesBloc.fetchLatestRateList(_baseCurrency, _currency);
-    
+
     _baseCurrencyTextEditingController =
         TextEditingController(text: widget.key.toString());
     _currencyTextEditingController =
@@ -266,6 +268,30 @@ class _MyHomePageState extends State<MyHomePage> {
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(8.0))),
                           ),
+                          onTap: () async {
+                            StreamBuilder(
+                              stream: _currencyBloc.currencyListStream,
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) return Container();
+
+                                return DropdownButton(
+                                  hint: const Text("Currency"),
+                                  value: snapshot.data,
+                                  items: _currencyBloc
+                                      .fetchCurrencyList()
+                                      .map((item) {
+                                    return DropdownMenuItem(
+                                      value: item,
+                                      child: Row(children: <Widget>[
+                                        Text(item),
+                                      ]),
+                                    );
+                                  }).toList(),
+                                  onChanged: _currencyBloc.fetchCurrencyList(),
+                                );
+                              },
+                            );
+                          },
                         ),
                       ),
                     ],
@@ -285,11 +311,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       primary: Colors.white,
                     ),
                     onPressed: () async {
-                      // appBloc!.add(KycEvent(
-                      //     userId: userData.id.toString(),
-                      //     email: emailController.text,
-                      //     birthday: birthdayController.text,
-                      // ));
+                      _latestRatesBloc.fetchLatestRateList(
+                          _baseCurrency, _currency);
                     },
                     child: isLoading
                         ? const CircularProgressIndicator(
@@ -322,7 +345,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           WidgetSpan(
                             alignment: PlaceholderAlignment.middle,
                             child: Padding(
-                              padding: EdgeInsets.only(left: 8.0, top: 0.0),
+                              padding:
+                                  const EdgeInsets.only(left: 8.0, top: 0.0),
                               child: Icon(
                                 Icons.info,
                                 color: Colors.grey[300],
@@ -344,12 +368,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _showChart(BuildContext ctx) {
+    final double height = MediaQuery.of(context).size.height;
+    final double width = MediaQuery.of(context).size.width;
     showModalBottomSheet(
         backgroundColor: Colors.transparent,
         isScrollControlled: true,
         elevation: 5,
         context: ctx,
         builder: (ctx) => Container(
+              height: height / 1.7,
+              width: width,
               decoration: const BoxDecoration(
                   color: AppColors.blue,
                   borderRadius: BorderRadius.only(
@@ -360,15 +388,18 @@ class _MyHomePageState extends State<MyHomePage> {
                     top: 15,
                     left: 15,
                     right: 15,
-                    bottom: MediaQuery.of(ctx).viewInsets.bottom + 45),
+                    bottom: MediaQuery.of(ctx).viewInsets.bottom + 40),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(
+                      height: height / 30,
+                    ),
                     Container(
                       padding: const EdgeInsets.all(10),
-                      width: double.infinity,
-                      height: double.infinity,
+                      width: width,
+                      height: height / 3,
                       child: LineChart(
                         LineChartData(
                             borderData: FlBorderData(show: false),
@@ -383,21 +414,29 @@ class _MyHomePageState extends State<MyHomePage> {
                                 const FlSpot(6, 17),
                                 const FlSpot(7, 15),
                                 const FlSpot(8, 20)
-                              ])
+                              ], colors: [
+                                AppColors.blue,
+                                AppColors.lightBlue
+                              ], isCurved: true)
                             ]),
                       ),
                     ),
-                    TextButton(
-                        onPressed: () {},
-                        child: const Center(
-                          child: Text(
-                            AppStrings.rateAlertText,
-                            style: TextStyle(
-                                color: Colors.white,
-                                decoration: TextDecoration.underline),
-                            textAlign: TextAlign.center,
-                          ),
-                        ))
+                    SizedBox(
+                      height: height / 30,
+                    ),
+                    Expanded(
+                      child: TextButton(
+                          onPressed: () {},
+                          child: const Center(
+                            child: Text(
+                              AppStrings.rateAlertText,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  decoration: TextDecoration.underline),
+                              textAlign: TextAlign.center,
+                            ),
+                          )),
+                    )
                   ],
                 ),
               ),

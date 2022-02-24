@@ -18,14 +18,14 @@ class CurrencyBloc {
   }
 
   fetchCurrencyList() async {
-    currencyListSink.add(ApiResponse.loading('Fetching Currencies'));
+    currencyListSink.add(ApiResponse<List<Symbol>>.loading('Fetching Currencies'));
     try {
       List<Symbol> currencies =
           await _currencyCalculatorRepository!.fetchCurrenciesList();
-      currencyListSink.add(ApiResponse.completed(currencies));
+      currencyListSink.add(ApiResponse<List<Symbol>>.completed(currencies));
     } catch (e) {
-      currencyListSink.add(ApiResponse.error(e.toString()));
-      print(currencyListStream);
+      currencyListSink.add(ApiResponse<List<Symbol>>.error(e.toString()));
+      print(e);
     }
   }
 

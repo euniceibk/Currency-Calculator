@@ -17,13 +17,13 @@ class LatestRatesBloc {
   }
 
   fetchLatestRateList(base,symbols) async {
-    latestRateListSink.add(ApiResponse.loading('Fetching Latest Rates'));
+    latestRateListSink.add(ApiResponse<LatestRatesResponse>.loading('Fetching Latest Rates'));
     try {
       LatestRatesResponse latestRates =
           await _currencyCalculatorRepository!.fetchLatestRates(base,symbols);
-      latestRateListSink.add(ApiResponse.completed(latestRates));
+      latestRateListSink.add(ApiResponse<LatestRatesResponse>.completed(latestRates));
     } catch (e) {
-      latestRateListSink.add(ApiResponse.error(e.toString()));
+      latestRateListSink.add(ApiResponse<LatestRatesResponse>.error(e.toString()));
       print(e);
     }
   }

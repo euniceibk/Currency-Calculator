@@ -6,11 +6,11 @@ import '../network/api_base-helper.dart';
 
 
 class CurrencyCalculatorRepository {
-  ApiBaseHelper _helper = ApiBaseHelper();
- final String api_key = AppConstants.apiAccessKey;
+  final ApiBaseHelper _helper = ApiBaseHelper();
+ final String apiKey = AppConstants.apiAccessKey;
 
   Future<List<Symbol>> fetchCurrenciesList() async {
-    final response = await _helper.get("http://data.fixer.io/api/symbols?access_key=$api_key");
+    final response = await _helper.get("http://data.fixer.io/api/symbols?access_key=$apiKey");
     return AvailableCurrencies.fromJson(response
     ).symbols;
   }
@@ -20,7 +20,7 @@ class CurrencyCalculatorRepository {
     //   'base': base,
     //   'symbols': symbols
     // };
-    final response = await _helper.get("http://data.fixer.io/api/latest?access_key=$api_key&base=$base%symbols=$symbols");
+    final response = await _helper.get("http://data.fixer.io/api/latest?access_key=$apiKey&base=$base%symbols=$symbols");
     return  LatestRatesResponse.fromJson(response);
   }
 }
